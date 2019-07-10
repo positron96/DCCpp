@@ -244,6 +244,10 @@ void DCCpp::begin()
 		EEStore::store();
 #endif
 
+#ifdef POWER_LED
+	pinMode(POWER_LED, OUTPUT);
+#endif
+
 #ifdef DCCPP_DEBUG_MODE
 	//pinMode(LED_BUILTIN, OUTPUT);
 	Serial.println(F("begin achieved"));
@@ -294,22 +298,22 @@ void DCCpp::beginEthernet(uint8_t *inMac, uint8_t *inIp, EthernetProtocol inProt
   // THE INTERRUPT CODE MACRO:  R=REGISTER LIST (mainRegs or progRegs), and N=Main or Prog postfix
 
 #define DCC_NEXT_BIT(R) \
-	if(R.currentBit==R.currentReg->activePacket->nBits){  /* IF no more bits in this DCC Packet */ \
-	R.currentBit = 0;                                     /*   reset current bit pointer and determine which Register and Packet to process next--- */ \
-	if (R.nRepeat>0 && R.currentReg == R.reg){               /*   IF current Register is first Register AND should be repeated */ \
-		R.nRepeat--;                                      /*     decrement repeat count; result is this same Packet will be repeated */ \
-	}  \
-	else if (R.nextReg != NULL){                           /*   ELSE IF another Register has been updated */ \
-		R.currentReg = R.nextReg;                         /*     update currentReg to nextReg */ \
-		R.nextReg = NULL;                                 /*     reset nextReg to NULL */ \
-		R.tempPacket = R.currentReg->activePacket;        /*     flip active and update Packets */ \
-		R.currentReg->activePacket = R.currentReg->updatePacket; \
-		R.currentReg->updatePacket = R.tempPacket; \
-	} \
-	else {                                                /*   ELSE simply move to next Register */ \
-		if (R.currentReg == R.maxLoadedReg)                  /*     BUT IF this is last Register loaded */ \
-			R.currentReg = R.reg;                         /*       first reset currentReg to base Register, THEN */ \
-		R.currentReg++;                                   /*     increment current Register (note this logic causes Register[0] to be skipped when simply cycling through all Registers) */ \
+	if(R.currentBit==R.currentReg->activePacket->nBits) { /* IF no more bits in this DCC Packet */ \
+		R.currentBit = 0;                                 /*   reset current bit pointer and determine which Register and Packet to process next--- */ \
+		if (R.nRepeat>0 && R.currentReg == R.reg){        /*   IF current Register is first Register AND should be repeated */ \
+			R.nRepeat--;                                  /*     decrement repeat count; result is this same Packet will be repeated */ \
+		}  \
+		else if (R.nextReg != NULL){                      /*   ELSE IF another Register has been updated */ \
+			R.currentReg = R.nextReg;                     /*     update currentReg to nextReg */ \
+			R.nextReg = NULL;                             /*     reset nextReg to NULL */ \
+			R.tempPacket = R.currentReg->activePacket;    /*     flip active and update Packets */ \
+			R.currentReg->activePacket = R.currentReg->updatePacket; \
+			R.currentReg->updatePacket = R.tempPacket; \
+		} \
+		else {                                            /*   ELSE simply move to next Register */ \
+			if (R.currentReg == R.maxLoadedReg)           /*     BUT IF this is last Register loaded */ \
+				R.currentReg = R.reg;                     /*       first reset currentReg to base Register, THEN */ \
+			R.currentReg++;                               /*     increment current Register (note this logic causes Register[0] to be skipped when simply cycling through all Registers) */ \
 		}                                                 /*   END-ELSE */ \
 	}                                                     /* END-IF: currentReg, activePacket, and currentBit should now be properly set to point to next DCC bit */ \
 	if(R.currentReg->activePacket->buf[R.currentBit/8] & R.bitMask[R.currentBit%8]) {  \
@@ -470,6 +474,9 @@ void DCCpp::powerOn(bool inMain, bool inProg)
 
 	if (inMain && DCCppConfig::SignalEnablePinMain != UNDEFINED_PIN)
 		digitalWrite(DCCppConfig::SignalEnablePinMain, HIGH);
+#ifdef POWER_LED
+	digitalWrite(POWER_LED, HIGH);
+#endif
 	DCCPP_INTERFACE.print("<p1>");
 #if !defined(USE_ETHERNET)
 	DCCPP_INTERFACE.println("");
@@ -482,6 +489,9 @@ void DCCpp::powerOff(bool inMain, bool inProg)
 		digitalWrite(DCCppConfig::SignalEnablePinProg, LOW);
 	if (inMain && DCCppConfig::SignalEnablePinMain != UNDEFINED_PIN)
 		digitalWrite(DCCppConfig::SignalEnablePinMain, LOW);
+#ifdef POWER_LED
+	digitalWrite(POWER_LED, LOW);
+#endif
 	DCCPP_INTERFACE.print("<p0>");
 #if !defined(USE_ETHERNET)
 	DCCPP_INTERFACE.println("");

@@ -28,10 +28,23 @@ WITH OPTIONAL PARAMETERS, AND BRACKETED BY < AND > SYMBOLS.  SPACES BETWEEN PARA
 ARE REQUIRED.  SPACES ANYWHERE ELSE ARE IGNORED.  A SPACE BETWEEN THE SINGLE-CHARACTER
 COMMAND AND THE FIRST PARAMETER IS ALSO NOT REQUIRED.*/
 struct TextCommand{
-  static char commandString[MAX_COMMAND_LENGTH+1];
-  static void init(volatile RegisterList *, volatile RegisterList *, CurrentMonitor *);
-  static void parse(char *);
-  static void process();
+	static char commandString[MAX_COMMAND_LENGTH+1];
+	static void init(volatile RegisterList *, volatile RegisterList *, CurrentMonitor *);
+	static void parse(char *);
+	static void process();
+
+private:
+	static void setThrottle(char *);
+	static void setFunction(char *);
+	static void setAccessory(char *);
+	static void writeTextPacket(volatile RegisterList& rl, char *);
+
+	static void readCV(volatile RegisterList& rl, char *);
+	static void writeVerifyCVByteProg(char *);
+	static void writeVerifyCVBitProg(char *);
+
+	static void writeCVByteMain(char *);
+	static void writeCVBitMain(char *s);
 }; // TextCommand
   
 #endif

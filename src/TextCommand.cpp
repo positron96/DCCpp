@@ -102,19 +102,19 @@ void TextCommand::parse(char *com){
 		<t REGISTER CAB SPEED DIRECTION>
 		\endverbatim
 		</b>
-	
-	   sets the throttle for a given register/cab combination 
-	   
-	   - <b>REGISTE%R</b>: an internal register number, from 1 through MAX_MAIN_REGISTERS (inclusive), to store the DCC packet used to control this throttle setting
-	   - <b>CAB</b>:  the short (1-127) or long (128-10293) address of the engine decoder
-	   - <b>SPEED</b>: throttle speed from 0-126, or -1 for emergency stop (resets SPEED to 0)
-	   - <b>DIRECTION</b>: 1=forward, 0=reverse.  Setting direction when speed=0 or speed=-1 only effects directionality of cab lighting for a stopped train
-	   
-	   returns: <b>\<T REGISTE%R SPEED DIRECTION\></b>
-	   */
 
-	  DCCpp::mainRegs.setThrottle(com+1);
-	  break;
+		sets the throttle for a given register/cab combination 
+
+		- <b>REGISTE%R</b>: an internal register number, from 1 through MAX_MAIN_REGISTERS (inclusive), to store the DCC packet used to control this throttle setting
+		- <b>CAB</b>:  the short (1-127) or long (128-10293) address of the engine decoder
+		- <b>SPEED</b>: throttle speed from 0-126, or -1 for emergency stop (resets SPEED to 0)
+		- <b>DIRECTION</b>: 1=forward, 0=reverse.  Setting direction when speed=0 or speed=-1 only effects directionality of cab lighting for a stopped train
+
+		returns: <b>\<T REGISTE%R SPEED DIRECTION\></b>
+		*/
+
+		setThrottle(com+1);
+		break;
 
 	case 'f':       
 		/**	\addtogroup commandsGroup
@@ -161,8 +161,8 @@ void TextCommand::parse(char *com){
 		*/
 
 
-	  DCCpp::mainRegs.setFunction(com+1);
-	  break;
+		setFunction(com+1);
+		break;
 
 	case 'a':       
 		/**	\addtogroup commandsGroup
@@ -200,8 +200,8 @@ void TextCommand::parse(char *com){
 		returns: NONE
 		*/
 
-	  DCCpp::mainRegs.setAccessory(com+1);
-	  break;
+		setAccessory(com+1);
+		break;
 
 #ifdef USE_TURNOUT
 	case 'T':
@@ -210,8 +210,8 @@ void TextCommand::parse(char *com){
 * USED TO CREATE/EDIT/REMOVE/SHOW TURNOUT DEFINITIONS
 */
 
-	  Turnout::parse(com+1);
-	  break;
+		Turnout::parse(com+1);
+		break;
 #endif
 
 #ifdef USE_OUTPUT
@@ -221,8 +221,8 @@ void TextCommand::parse(char *com){
 *   USED TO CREATE / EDIT / REMOVE / SHOW OUTPUT DEFINITIONS
 */
 
-	  Output::parse(com+1);
-	  break;
+		Output::parse(com+1);
+		break;
 #endif
 
 #ifdef USE_SENSOR
@@ -232,8 +232,8 @@ void TextCommand::parse(char *com){
  *   *** SEE SENSOR.CPP FOR COMPLETE INFO ON THE DIFFERENT VARIATIONS OF THE "S" COMMAND
  *   USED TO CREATE/EDIT/REMOVE/SHOW SENSOR DEFINITIONS
  */
-	  Sensor::parse(com+1);
-	  break;
+		Sensor::parse(com+1);
+		break;
 
 #ifdef DCCPP_PRINT_DCCPP
 	case 'Q':
@@ -250,8 +250,8 @@ void TextCommand::parse(char *com){
 		returns: the status of each sensor ID in the form <b>\<Q ID\></b> (active) or <b>\<q ID\></b> (not active)
 		*/
 
-	  Sensor::status();
-	  break;
+		Sensor::status();
+		break;
 #endif
 #endif
 
@@ -276,8 +276,8 @@ void TextCommand::parse(char *com){
 		returns: NONE
 		*/    
 
-	  DCCpp::mainRegs.writeCVByteMain(com+1);
-	  break;      
+		writeCVByteMain(com+1);
+		break;      
 
 
 	case 'b':      
@@ -301,8 +301,8 @@ void TextCommand::parse(char *com){
 		returns: NONE
 		*/        
 
-	  DCCpp::mainRegs.writeCVBitMain(com+1);
-	  break;      
+		writeCVBitMain(com+1);
+		break;      
 
 	case 'W':      
 		/**	\addtogroup commandsGroup
@@ -326,7 +326,7 @@ void TextCommand::parse(char *com){
 		where VALUE is a number from 0-255 as read from the requested CV, or -1 if verification read fails
 		*/    
 
-	  DCCpp::progRegs.writeCVByte(com+1);
+	  writeVerifyCVByteProg(com+1);
 	  break;      
 
 	case 'B':      
@@ -352,7 +352,7 @@ void TextCommand::parse(char *com){
 		where VALUE is a number from 0-1 as read from the requested CV bit, or -1 if verification read fails
 		*/
 
-	  DCCpp::progRegs.writeCVBit(com+1);
+	  writeVerifyCVBitProg(com+1);
 	  break;      
 
 	case 'R':     
@@ -376,7 +376,7 @@ void TextCommand::parse(char *com){
 		where VALUE is a number from 0-255 as read from the requested CV, or -1 if read could not be verified
 		*/
 
-	  DCCpp::progRegs.readCV(com+1);
+	  readCV(DCCpp::progRegs, com+1);
 	  break;
 
 	case '1':      
@@ -394,9 +394,8 @@ void TextCommand::parse(char *com){
     
 		returns: <b>\<p1\></b>
 		*/    
-
-	  DCCpp::powerOn();
-	  break;
+		DCCpp::powerOn();
+		break;
 		  
 	case '0':     
 		/**	\addtogroup commandsGroup
@@ -413,7 +412,6 @@ void TextCommand::parse(char *com){
     
 		returns: <b>\<p0\></b>
 		*/
-
 		DCCpp::powerOff();
 		break;
 
@@ -434,13 +432,13 @@ void TextCommand::parse(char *com){
 		where CURRENT = 0-1024, based on exponentially-smoothed weighting scheme
 		*/
 
-	  DCCPP_INTERFACE.print("<a");
-	  DCCPP_INTERFACE.print(int(DCCpp::getCurrentMain()));
-	  DCCPP_INTERFACE.print(">");
+		DCCPP_INTERFACE.print("<a");
+		DCCPP_INTERFACE.print(int(DCCpp::getCurrentMain()));
+		DCCPP_INTERFACE.print(">");
 #if !defined(USE_ETHERNET)
-	  DCCPP_INTERFACE.println("");
+		DCCPP_INTERFACE.println("");
 #endif
-	  break;
+		break;
 
 	case 's':
 		/**	\addtogroup commandsGroup
@@ -459,46 +457,46 @@ void TextCommand::parse(char *com){
 		returns: series of status messages that can be read by an interface to determine status of DCC++ Base Station and important settings
 		*/
 
-	  if(digitalRead(DCCppConfig::SignalEnablePinProg)==LOW)      // could check either PROG or MAIN
-		DCCPP_INTERFACE.print("<p0>");
-	  else
-		DCCPP_INTERFACE.print("<p1>");
-#if !defined(USE_ETHERNET)
-	  DCCPP_INTERFACE.println("");
-#endif
-
-	  for(int i=1;i<=MAX_MAIN_REGISTERS;i++){
-		if(DCCpp::mainRegs.speedTable[i]==0)
-		  continue;
-		DCCPP_INTERFACE.print("<T");
-		DCCPP_INTERFACE.print(i); DCCPP_INTERFACE.print(" ");
-		if(DCCpp::mainRegs.speedTable[i]>0){
-		  DCCPP_INTERFACE.print(DCCpp::mainRegs.speedTable[i]);
-		  DCCPP_INTERFACE.print(" 1>");
-		} else{
-		  DCCPP_INTERFACE.print(- DCCpp::mainRegs.speedTable[i]);
-		  DCCPP_INTERFACE.print(" 0>");
-		}          
+		if(digitalRead(DCCppConfig::SignalEnablePinProg)==LOW)      // could check either PROG or MAIN
+			DCCPP_INTERFACE.print("<p0>");
+		else
+			DCCPP_INTERFACE.print("<p1>");
 #if !defined(USE_ETHERNET)
 		DCCPP_INTERFACE.println("");
 #endif
-	  }
-	  DCCPP_INTERFACE.print("<iDCCpp LIBRARY BASE STATION FOR ARDUINO ");
-	  //DCCPP_INTERFACE.print(ARDUINO_TYPE);
-	  //DCCPP_INTERFACE.print(" / ");
-	  //DCCPP_INTERFACE.print(MOTOR_SHIELD_NAME);
-	  DCCPP_INTERFACE.print(": V-");
-	  DCCPP_INTERFACE.print(VERSION);
-	  DCCPP_INTERFACE.print(" / ");
-	  DCCPP_INTERFACE.print(__DATE__);
-	  DCCPP_INTERFACE.print(" ");
-	  DCCPP_INTERFACE.print(__TIME__);
-	  DCCPP_INTERFACE.print(">");
+
+		for(int i=1;i<=MAX_MAIN_REGISTERS;i++) {
+			if(DCCpp::mainRegs.speedTable[i]==0)
+				continue;
+			DCCPP_INTERFACE.print("<T");
+			DCCPP_INTERFACE.print(i); DCCPP_INTERFACE.print(" ");
+			if(DCCpp::mainRegs.speedTable[i]>0){
+				DCCPP_INTERFACE.print(DCCpp::mainRegs.speedTable[i]);
+				DCCPP_INTERFACE.print(" 1>");
+			} else {
+				DCCPP_INTERFACE.print(- DCCpp::mainRegs.speedTable[i]);
+				DCCPP_INTERFACE.print(" 0>");
+			}          
 #if !defined(USE_ETHERNET)
-	  DCCPP_INTERFACE.println("");
+		DCCPP_INTERFACE.println("");
+#endif
+	  	}
+		DCCPP_INTERFACE.print("<iDCCpp LIBRARY BASE STATION FOR ARDUINO ");
+		//DCCPP_INTERFACE.print(ARDUINO_TYPE);
+		//DCCPP_INTERFACE.print(" / ");
+		//DCCPP_INTERFACE.print(MOTOR_SHIELD_NAME);
+		DCCPP_INTERFACE.print(": V-");
+		DCCPP_INTERFACE.print(VERSION);
+		DCCPP_INTERFACE.print(" / ");
+		DCCPP_INTERFACE.print(__DATE__);
+		DCCPP_INTERFACE.print(" ");
+		DCCPP_INTERFACE.print(__TIME__);
+		DCCPP_INTERFACE.print(">");
+#if !defined(USE_ETHERNET)
+		DCCPP_INTERFACE.println("");
 #endif
 
-	  DCCPP_INTERFACE.print("<N ");
+		DCCPP_INTERFACE.print("<N ");
 #if defined(USE_ETHERNET)
 		DCCPP_INTERFACE.print("ETHERNET :");
 		DCCPP_INTERFACE.print(Ethernet.localIP());
@@ -507,21 +505,21 @@ void TextCommand::parse(char *com){
 		DCCPP_INTERFACE.println("");
 #endif
 #else
-	  DCCPP_INTERFACE.println("SERIAL>");
+		DCCPP_INTERFACE.println("SERIAL>");
 #endif
 
 #ifdef DCCPP_PRINT_DCCPP
 #ifdef USE_TURNOUT
-	  Turnout::show();
+		Turnout::show();
 #endif
 #ifdef USE_OUTPUT
-	  Output::show();
+		Output::show();
 #endif
 #ifdef USE_SENSOR
-	  Sensor::show();
+		Sensor::show();
 #endif
 #endif
-	  break;
+		break;
 
 #ifdef USE_EEPROM
 	case 'E':     
@@ -540,18 +538,18 @@ void TextCommand::parse(char *com){
 		returns: <b>\<e nTurnouts nSensors\></b>
 		*/
 	 
-	EEStore::store();
-	DCCPP_INTERFACE.print("<e ");
-	DCCPP_INTERFACE.print(EEStore::data.nTurnouts);
-	DCCPP_INTERFACE.print(" ");
-	DCCPP_INTERFACE.print(EEStore::data.nSensors);
-	DCCPP_INTERFACE.print(" ");
-	DCCPP_INTERFACE.print(EEStore::data.nOutputs);
-	DCCPP_INTERFACE.print(">");
+		EEStore::store();
+		DCCPP_INTERFACE.print("<e ");
+		DCCPP_INTERFACE.print(EEStore::data.nTurnouts);
+		DCCPP_INTERFACE.print(" ");
+		DCCPP_INTERFACE.print(EEStore::data.nSensors);
+		DCCPP_INTERFACE.print(" ");
+		DCCPP_INTERFACE.print(EEStore::data.nOutputs);
+		DCCPP_INTERFACE.print(">");
 #if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
+		DCCPP_INTERFACE.println("");
 #endif
-	break;
+		break;
 
 	case 'e':     
 		/**	\addtogroup commandsGroup
@@ -569,10 +567,10 @@ void TextCommand::parse(char *com){
 		returns: <b>\<O\></b>
 		*/
 	 
-	EEStore::clear();
-	DCCPP_INTERFACE.print("<O>");
+		EEStore::clear();
+		DCCPP_INTERFACE.print("<O>");
 #if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
+		DCCPP_INTERFACE.println("");
 #endif
 	break;
 #endif
@@ -593,8 +591,8 @@ void TextCommand::parse(char *com){
 		returns: a carriage return
 		*/
 
-	  DCCPP_INTERFACE.println("");
-	  break;  
+		DCCPP_INTERFACE.println("");
+		break;  
 
 ///          
 /// THE FOLLOWING COMMANDS ARE NOT NEEDED FOR NORMAL OPERATIONS AND ARE ONLY USED FOR TESTING AND DEBUGGING PURPOSES
@@ -616,31 +614,31 @@ void TextCommand::parse(char *com){
 		SERIAL COMMUNICATION WILL BE INTERUPTED ONCE THIS COMMAND IS ISSUED - MUST RESET BOARD OR RE-OPEN SERIAL WINDOW TO RE-ESTABLISH COMMS
 		*/
 
-	Serial.println("\nEntering Diagnostic Mode...");
-	delay(1000);
-	
-	bitClear(TCCR1B,CS12);    // set Timer 1 prescale=8 - SLOWS NORMAL SPEED BY FACTOR OF 8
-	bitSet(TCCR1B,CS11);
-	bitClear(TCCR1B,CS10);
+		Serial.println("\nEntering Diagnostic Mode...");
+		delay(1000);
+		
+		bitClear(TCCR1B,CS12);    // set Timer 1 prescale=8 - SLOWS NORMAL SPEED BY FACTOR OF 8
+		bitSet(TCCR1B,CS11);
+		bitClear(TCCR1B,CS10);
 
-	#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO)      // Configuration for UNO
+		#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO)      // Configuration for UNO
 
-	  bitSet(TCCR0B,CS02);    // set Timer 0 prescale=256 - SLOWS NORMAL SPEED BY A FACTOR OF 4
-	  bitClear(TCCR0B,CS01);
-	  bitClear(TCCR0B,CS00);
-	  
-	#else                     // Configuration for MEGA
+		  bitSet(TCCR0B,CS02);    // set Timer 0 prescale=256 - SLOWS NORMAL SPEED BY A FACTOR OF 4
+		  bitClear(TCCR0B,CS01);
+		  bitClear(TCCR0B,CS00);
+		  
+		#else                     // Configuration for MEGA
 
-	  bitClear(TCCR3B,CS32);    // set Timer 3 prescale=8 - SLOWS NORMAL SPEED BY A FACTOR OF 8
-	  bitSet(TCCR3B,CS31);
-	  bitClear(TCCR3B,CS30);
+		  bitClear(TCCR3B,CS32);    // set Timer 3 prescale=8 - SLOWS NORMAL SPEED BY A FACTOR OF 8
+		  bitSet(TCCR3B,CS31);
+		  bitClear(TCCR3B,CS30);
 
-	#endif
+		#endif
 
-	CLKPR = 0x80;           // THIS SLOWS DOWN SYSYEM CLOCK BY FACTOR OF 256
-	CLKPR = 0x08;           // BOARD MUST BE RESET TO RESUME NORMAL OPERATIONS
+		CLKPR = 0x80;           // THIS SLOWS DOWN SYSYEM CLOCK BY FACTOR OF 256
+		CLKPR = 0x08;           // BOARD MUST BE RESET TO RESUME NORMAL OPERATIONS
 
-	break;
+		break;
 
 	case 'M':       
 		/**	\addtogroup commandsGroup
@@ -666,8 +664,8 @@ void TextCommand::parse(char *com){
 		returns: NONE   
 		*/
 
-	  DCCpp::mainRegs.writeTextPacket(com+1);
-	  break;
+		writeTextPacket(DCCpp::mainRegs, com+1);
+		break;
 
 	case 'P':       
 		/**	\addtogroup commandsGroup
@@ -693,8 +691,8 @@ void TextCommand::parse(char *com){
 		returns: NONE   
 		*/
 
-	  DCCpp::progRegs.writeTextPacket(com+1);
-	  break;
+		writeTextPacket(DCCpp::progRegs, com+1);
+		break;
 			
 #ifndef VISUALSTUDIO
 	case 'F':     
@@ -716,14 +714,14 @@ void TextCommand::parse(char *com){
 		where MEM is the number of free bytes remaining in the Arduino's SRAM
 		*/
 
-	  int v; 
+		int v; 
 		DCCPP_INTERFACE.print("<f");
 		DCCPP_INTERFACE.print((int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval));
 		DCCPP_INTERFACE.print(">");
 #if !defined(USE_ETHERNET)
 		DCCPP_INTERFACE.println("");
 #endif
-	  break;
+		break;
 #endif
 
 	case 'L':     
@@ -764,11 +762,296 @@ void TextCommand::parse(char *com){
 	  }
 	  DCCPP_INTERFACE.println("");
 	  break;
+	default:
+		DCCPP_INTERFACE.println("Unknown command");
 
   } // switch
 }; // SerialCommand::parse
 
 ///////////////////////////////////////////////////////////////////////////////
+
+
+void TextCommand::setThrottle(char *s) 
+{
+	int nReg;
+	int cab;
+	int tSpeed;
+	int tDirection;
+  
+	if (sscanf(s, "%d %d %d %d", &nReg, &cab, &tSpeed, &tDirection) != 4)
+	{
+#ifdef DCCPP_DEBUG_MODE
+    	Serial.println(F("t Syntax error"));
+#endif
+		return;
+	}
+
+	DCCpp::mainRegs.setThrottle(nReg, cab, tSpeed, tDirection);
+
+	DCCPP_INTERFACE.print("{T nReg=");
+	DCCPP_INTERFACE.print(nReg); DCCPP_INTERFACE.print(" addr=");
+	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" speed=");
+	DCCPP_INTERFACE.print(tSpeed); DCCPP_INTERFACE.print(" dir=");
+	DCCPP_INTERFACE.print(tDirection);
+	DCCPP_INTERFACE.print("}");
+#if !defined(USE_ETHERNET)
+	DCCPP_INTERFACE.println("");
+#endif
+} // TextCommand::setThrottle(string)
+
+
+void TextCommand::setFunction(char *s)
+{
+	int cab;
+	int fByte, eByte;
+	int nParams;
+
+	nParams = sscanf(s, "%d %d %d", &cab, &fByte, &eByte);
+	if (nParams<2)
+	{
+#ifdef DCCPP_DEBUG_MODE
+		Serial.println(F("f Syntax error"));
+#endif
+		return;
+	}
+
+	if (nParams == 2)                       // this is a request for functions FL,F1-F12  
+		eByte = -1;
+
+	DCCpp::mainRegs.setFunction(0, cab, fByte, eByte);	// TODO : nReg 0 is not valid !
+
+#ifdef DCCPP_DEBUG_MODE
+	DCCPP_INTERFACE.print("{F addr=");
+	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" f=");
+	DCCPP_INTERFACE.print(fByte); DCCPP_INTERFACE.print(" e=");
+	DCCPP_INTERFACE.print(eByte);
+	DCCPP_INTERFACE.print("}");
+#if !defined(USE_ETHERNET)
+	DCCPP_INTERFACE.println("");
+#endif
+#endif
+
+} // TextCommand::setFunction(string)
+
+
+
+void TextCommand::setAccessory(char *s) 
+{
+	int aAdd;                       // the accessory address (0-511 = 9 bits) 
+	int aNum;                       // the accessory number within that address (0-3)
+	int activate;                   // flag indicated whether accessory should be activated (1) or deactivated (0) following NMRA recommended convention
+
+	if (sscanf(s, "%d %d %d", &aAdd, &aNum, &activate) != 3)
+	{
+#ifdef DCCPP_DEBUG_MODE
+		Serial.println(F("a Syntax error"));
+#endif
+		return;
+	}
+
+	DCCpp::mainRegs.setAccessory(aAdd, aNum, activate);
+
+#ifdef DCCPP_DEBUG_MODE
+	DCCPP_INTERFACE.print("{a id=");
+	DCCPP_INTERFACE.print(aAdd); DCCPP_INTERFACE.print(" num=");
+	DCCPP_INTERFACE.print(aNum); DCCPP_INTERFACE.print(" <- ");
+	DCCPP_INTERFACE.print(activate);
+	DCCPP_INTERFACE.print("}");
+#if !defined(USE_ETHERNET)
+	DCCPP_INTERFACE.println("");
+#endif
+#endif
+
+} // TextCommand::setAccessory(string)
+
+
+void TextCommand::writeTextPacket(volatile RegisterList& rl, char *s)
+{
+	int nReg;
+	byte b[6];
+	int nBytes;
+
+	nBytes = sscanf(s, "%d %hhx %hhx %hhx %hhx %hhx", &nReg, b, b+1, b+2, b+3, b+4) - 1;
+
+	rl.writeTextPacket(nReg, b, nBytes);
+
+#ifdef DCCPP_DEBUG_MODE
+	DCCPP_INTERFACE.print("{P/p");
+	DCCPP_INTERFACE.print(nReg); DCCPP_INTERFACE.print(" ");
+	DCCPP_INTERFACE.print(nBytes); DCCPP_INTERFACE.print(": [");
+	DCCPP_INTERFACE.print(b[0]); DCCPP_INTERFACE.print(",");
+	DCCPP_INTERFACE.print(b[1]); DCCPP_INTERFACE.print(",");
+	DCCPP_INTERFACE.print(b[2]); DCCPP_INTERFACE.print(",");
+	DCCPP_INTERFACE.print(b[3]); DCCPP_INTERFACE.print(",");
+	DCCPP_INTERFACE.print(b[4]); DCCPP_INTERFACE.print("] ");
+	DCCPP_INTERFACE.print("}");
+#if !defined(USE_ETHERNET)
+	DCCPP_INTERFACE.println("");
+#endif
+#endif
+
+} // TextCommand::writeTextPacket(string)
+
+
+void TextCommand::readCV(volatile RegisterList& rl, char *s)
+{
+	int cv, callBack, callBackSub;
+	int bValue;
+
+	if (sscanf(s, "%d %d %d", &cv, &callBack, &callBackSub) != 3)          // cv = 1-1024
+	{
+#ifdef DCCPP_DEBUG_MODE
+		Serial.println(F("R Syntax error"));
+#endif
+		bValue = -1;
+	} else {
+		bValue = rl.readCV(cv, callBack, callBackSub);
+	}
+	
+	DCCPP_INTERFACE.print("<r");
+	DCCPP_INTERFACE.print(callBack);
+	DCCPP_INTERFACE.print("|");
+	DCCPP_INTERFACE.print(callBackSub);
+	DCCPP_INTERFACE.print("|");
+	DCCPP_INTERFACE.print(cv + 1);
+	DCCPP_INTERFACE.print(" ");
+	DCCPP_INTERFACE.print(bValue);
+	DCCPP_INTERFACE.print(">");
+#if !defined(USE_ETHERNET)
+	DCCPP_INTERFACE.println("");
+#endif
+
+} // TextCommand::readCV(string)
+
+
+
+void TextCommand::writeVerifyCVByteProg(char *s)
+{
+	int bValue, cv, callBack, callBackSub;
+
+	if (sscanf(s, "%d %d %d %d", &cv, &bValue, &callBack, &callBackSub) != 4)          // cv = 1-1024
+	{
+#ifdef DCCPP_DEBUG_MODE
+		Serial.println(F("W Syntax error"));
+#endif
+		return;
+	}
+
+	bool ret = DCCpp::progRegs.writeVerifyCVByte(cv, bValue, callBack, callBackSub);
+
+	DCCPP_INTERFACE.print("<r");
+	DCCPP_INTERFACE.print(callBack);
+	DCCPP_INTERFACE.print("|");
+	DCCPP_INTERFACE.print(callBackSub);
+	DCCPP_INTERFACE.print("|");
+	DCCPP_INTERFACE.print(cv + 1);
+	DCCPP_INTERFACE.print(" ");
+	DCCPP_INTERFACE.print(ret ? bValue : -1);
+	DCCPP_INTERFACE.print(">");
+#if !defined(USE_ETHERNET)
+	DCCPP_INTERFACE.println("");
+#endif
+
+} // TextCommand::writeCVByte(string)
+
+
+void TextCommand::writeVerifyCVBitProg(char *s)
+{
+	int bNum, bValue, cv, callBack, callBackSub;
+
+	if(sscanf(s,"%d %d %d %d %d",&cv,&bNum,&bValue,&callBack,&callBackSub) != 5)      // cv = 1-1024
+	{
+#ifdef DCCPP_DEBUG_MODE
+		Serial.println(F("W Syntax error"));
+#endif
+		return;
+	}
+
+	bool ret = DCCpp::progRegs.writeVerifyCVBit(cv, bNum, bValue, callBack, callBackSub);
+
+	DCCPP_INTERFACE.print("<r");
+	DCCPP_INTERFACE.print(callBack);
+	DCCPP_INTERFACE.print("|");
+	DCCPP_INTERFACE.print(callBackSub);
+	DCCPP_INTERFACE.print("|");
+	DCCPP_INTERFACE.print(cv + 1);
+	DCCPP_INTERFACE.print(" ");
+	DCCPP_INTERFACE.print(bNum);
+	DCCPP_INTERFACE.print(" ");
+	DCCPP_INTERFACE.print(ret ? bValue : -1);
+	DCCPP_INTERFACE.print(">");
+#if !defined(USE_ETHERNET)
+	DCCPP_INTERFACE.println("");
+#endif
+
+
+} // TextCommand::writeCVBit(string)
+
+
+void TextCommand::writeCVByteMain(char *s) 
+{
+	int cab;
+	int cv;
+	int bValue;
+
+	if (sscanf(s, "%d %d %d", &cab, &cv, &bValue) != 3)
+	{
+#ifdef DCCPP_DEBUG_MODE
+		Serial.println(F("w Syntax error"));
+#endif
+		return;
+	}
+
+	DCCpp::mainRegs.writeCVByteMain(cab, cv, bValue);
+
+#ifdef DCCPP_DEBUG_MODE
+	DCCPP_INTERFACE.print("{w addr=");
+	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" CV");
+	DCCPP_INTERFACE.print(cv); DCCPP_INTERFACE.print(" <- ");
+	DCCPP_INTERFACE.print(bValue); DCCPP_INTERFACE.print(" ");
+	DCCPP_INTERFACE.print("}");
+#if !defined(USE_ETHERNET)
+	DCCPP_INTERFACE.println("");
+#endif
+#endif
+} // TextCommand::writeCVByteMain(string)
+
+
+void TextCommand::writeCVBitMain(char *s)
+{
+	int cab;
+	int cv;
+	int bNum;
+	int bValue;
+
+	if (sscanf(s, "%d %d %d %d", &cab, &cv, &bNum, &bValue) != 4)
+	{
+#ifdef DCCPP_DEBUG_MODE
+		Serial.println(F("w Syntax error"));
+#endif
+		return;
+	}
+
+	DCCpp::mainRegs.writeCVBitMain(cab, cv, bNum, bValue);
+
+#ifdef DCCPP_DEBUG_MODE
+	DCCPP_INTERFACE.print("{b addr=");
+	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" CV");
+	DCCPP_INTERFACE.print(cv); DCCPP_INTERFACE.print("[");
+	DCCPP_INTERFACE.print(bNum); DCCPP_INTERFACE.print("] <- ");
+	DCCPP_INTERFACE.print(bValue); DCCPP_INTERFACE.print(" ");
+	DCCPP_INTERFACE.print("}");
+#if !defined(USE_ETHERNET)
+	DCCPP_INTERFACE.println("");
+#endif
+#endif
+
+} // TextCommand::writeCVBitMain(string)
+
+
+
+
+
 
 #endif
 #endif

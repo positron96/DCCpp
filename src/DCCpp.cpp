@@ -669,13 +669,24 @@ int DCCpp::identifyLocoId(volatile RegisterList *inReg)
 	return(id);
 }
 
-void DCCpp::writeCv(volatile RegisterList *inReg, int inCv, byte inValue, int callBack, int callBackSub)
-{
-	inReg->writeCVByte(inCv, inValue, callBack, callBackSub);
 
+void DCCpp::writeCvProg(int inCvId, byte inValue, int callBack = 100, int callBackSub = 200) 
+{ 
+	progRegs.writeVerifyCVByte(inCvId, inValue, callBack, callBackSub);
 #ifdef DCCPP_DEBUG_MODE
-	Serial.print(F("DCCpp WriteCv "));
-	Serial.print(inCv);
+	Serial.print(F("DCCpp writeCvProg "));
+	Serial.print(inCvId);
+	Serial.print(F(" : "));
+	Serial.println(inValue);
+#endif
+}
+
+void DCCpp::writeCvMain(int inCvId, byte inValue, int callBack = 100, int callBackSub = 200) 
+{
+	mainRegs.writeVerifyCVByte(inCvId, inValue, callBack, callBackSub);
+#ifdef DCCPP_DEBUG_MODE
+	Serial.print(F("DCCpp writeCvMain "));
+	Serial.print(inCvId);
 	Serial.print(F(" : "));
 	Serial.println(inValue);
 #endif

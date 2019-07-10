@@ -75,7 +75,6 @@ class DCCpp
 
 		static bool setThrottle(volatile RegisterList *inReg, int nReg, int inLocoId, int inStepsNumber, int inNewSpeed, bool inForward);
 		//static int readCv(volatile RegisterList *inReg, byte inCvId, int callBack = 100, int callBackSub = 200) { return inReg->readCV(inCvId, callBack, callBackSub); }
-		static void writeCv(volatile RegisterList *inReg, int inCvId, byte inCvValue, int callBack = 100, int callBackSub = 200);
 		static int identifyLocoId(volatile RegisterList *inReg);
 		static void setFunctions(volatile RegisterList *inReg, int nReg, int inLocoId, FunctionsState &inStates);
 
@@ -198,7 +197,7 @@ class DCCpp
 		@param callBackSub	a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function. Default 200
 		@return CV value: the CV value if the value cannot be read.
 		*/
-		static inline int readCvMain(int inCvId, int callBack = 100, int callBackSub = 200) { return mainRegs.readCVmain(inCvId, callBack, callBackSub); }
+		static inline int readCvMain(int inCvId, int callBack = 100, int callBackSub = 200) { return mainRegs.readCV(inCvId, callBack, callBackSub); }
 
 		/** Write the given CV on the main track.
 		Be sure there is only one loco on the track before calling this function !
@@ -207,7 +206,7 @@ class DCCpp
 		@param callBack		an arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs that call this function. Default 100.
 		@param callBackSub	a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function. Default 200
 		*/
-		static inline void writeCvMain(int inCvId, byte inValue, int callBack = 100, int callBackSub = 200) { writeCv(&(mainRegs), inCvId, inValue, callBack, callBackSub); }
+		static void writeCvMain(int inCvId, byte inValue, int callBack = 100, int callBackSub = 200);
 
 		/** Set the functions states of the given decoder on the main track.
 		@param nReg	Register number. Avoid register 0, used for one shot commands like accessories or CV programming.
@@ -247,7 +246,7 @@ class DCCpp
 		@param callBack		an arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs that call this function. Default 100.
 		@param callBackSub	a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function. Default 200
 		*/
-		static inline void writeCvProg(int inCvId, byte inValue, int callBack = 100, int callBackSub = 200) { writeCv(&(progRegs), inCvId, inValue, callBack, callBackSub); }
+		static void writeCvProg(int inCvId, byte inValue, int callBack = 100, int callBackSub = 200);
 
 		/** Set the functions states of the given decoder on the programming track.
 		@param nReg	Register number. Avoid register 0, used for one shot commands like accessories or CV programming.

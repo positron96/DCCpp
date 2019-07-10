@@ -56,33 +56,13 @@ struct RegisterList{
   RegisterList(int);
   void loadPacket(int, byte *, int, int, int=0) volatile;
 
-#ifdef USE_TEXTCOMMAND
-  void setThrottle(char *) volatile;
-  void setFunction(char *) volatile;
-  void setAccessory(char *) volatile;
-  void writeTextPacket(char *) volatile;
-#endif
-
-  int readCVraw(int cv, int callBack, int callBackSub) volatile;
-
-#ifdef USE_TEXTCOMMAND
-  int readCV(char *) volatile;
-  void writeCVByte(char *) volatile;
-  void writeCVBit(char *) volatile;
-
-  int readCVmain(char *) volatile;
-  void writeCVByteMain(char *) volatile;
-  void writeCVBitMain(char *s) volatile;
-#endif
-
   void setThrottle(int nReg, int cab, int tSpeed, int tDirection) volatile;
   void setFunction(int nReg, int cab, int fByte, int eByte) volatile;
   void setAccessory(int aAdd, int aNum, int activate) volatile;
   void writeTextPacket(int nReg, byte *b, int nBytes) volatile;
   int readCV(int cv, int callBack, int callBackSub) volatile;
-  int readCVmain(int cv, int callBack, int callBackSub) volatile;
-  void writeCVByte(int cv, int bValue, int callBack, int callBackSub) volatile;
-  void writeCVBit(int cv, int bNum, int bValue, int callBack, int callBackSub) volatile;
+  bool writeVerifyCVByte(int cv, int bValue, int callBack, int callBackSub) volatile;
+  bool writeVerifyCVBit(int cv, int bNum, int bValue, int callBack, int callBackSub) volatile;
   void writeCVByteMain(int cab, int cv, int bvalue) volatile;
   void writeCVBitMain(int cab, int cv, int bNum, int bValue) volatile;
 

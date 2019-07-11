@@ -763,7 +763,7 @@ void TextCommand::parse(char *com){
 	  DCCPP_INTERFACE.println("");
 	  break;
 	default:
-		DCCPP_INTERFACE.println("Unknown command");
+		DCCPP_INTERFACE.println(F("Unknown command"));
 
   } // switch
 }; // SerialCommand::parse
@@ -788,7 +788,8 @@ void TextCommand::setThrottle(char *s)
 
 	DCCpp::mainRegs.setThrottle(nReg, cab, tSpeed, tDirection);
 
-	DCCPP_INTERFACE.print("{T nReg=");
+#ifdef DCCPP_DEBUG_MODE
+	DCCPP_INTERFACE.print(F("{thr nReg="));
 	DCCPP_INTERFACE.print(nReg); DCCPP_INTERFACE.print(" addr=");
 	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" speed=");
 	DCCPP_INTERFACE.print(tSpeed); DCCPP_INTERFACE.print(" dir=");
@@ -796,6 +797,7 @@ void TextCommand::setThrottle(char *s)
 	DCCPP_INTERFACE.print("}");
 #if !defined(USE_ETHERNET)
 	DCCPP_INTERFACE.println("");
+#endif
 #endif
 } // TextCommand::setThrottle(string)
 
@@ -821,7 +823,7 @@ void TextCommand::setFunction(char *s)
 	DCCpp::mainRegs.setFunction(0, cab, fByte, eByte);	// TODO : nReg 0 is not valid !
 
 #ifdef DCCPP_DEBUG_MODE
-	DCCPP_INTERFACE.print("{F addr=");
+	DCCPP_INTERFACE.print(F("{fun addr="));
 	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" f=");
 	DCCPP_INTERFACE.print(fByte); DCCPP_INTERFACE.print(" e=");
 	DCCPP_INTERFACE.print(eByte);
@@ -852,7 +854,7 @@ void TextCommand::setAccessory(char *s)
 	DCCpp::mainRegs.setAccessory(aAdd, aNum, activate);
 
 #ifdef DCCPP_DEBUG_MODE
-	DCCPP_INTERFACE.print("{a id=");
+	DCCPP_INTERFACE.print(F("{acc id="));
 	DCCPP_INTERFACE.print(aAdd); DCCPP_INTERFACE.print(" num=");
 	DCCPP_INTERFACE.print(aNum); DCCPP_INTERFACE.print(" <- ");
 	DCCPP_INTERFACE.print(activate);
@@ -876,8 +878,8 @@ void TextCommand::writeTextPacket(volatile RegisterList& rl, char *s)
 	rl.writeTextPacket(nReg, b, nBytes);
 
 #ifdef DCCPP_DEBUG_MODE
-	DCCPP_INTERFACE.print("{P/p");
-	DCCPP_INTERFACE.print(nReg); DCCPP_INTERFACE.print(" ");
+	DCCPP_INTERFACE.print(F("{raw nreg="));
+	DCCPP_INTERFACE.print(nReg); DCCPP_INTERFACE.print(" ln=");
 	DCCPP_INTERFACE.print(nBytes); DCCPP_INTERFACE.print(": [");
 	DCCPP_INTERFACE.print(b[0]); DCCPP_INTERFACE.print(",");
 	DCCPP_INTERFACE.print(b[1]); DCCPP_INTERFACE.print(",");
@@ -1005,7 +1007,7 @@ void TextCommand::writeCVByteMain(char *s)
 	DCCpp::mainRegs.writeCVByteMain(cab, cv, bValue);
 
 #ifdef DCCPP_DEBUG_MODE
-	DCCPP_INTERFACE.print("{w addr=");
+	DCCPP_INTERFACE.print(F("{wr byte main addr="));
 	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" CV");
 	DCCPP_INTERFACE.print(cv); DCCPP_INTERFACE.print(" <- ");
 	DCCPP_INTERFACE.print(bValue); DCCPP_INTERFACE.print(" ");
@@ -1035,7 +1037,7 @@ void TextCommand::writeCVBitMain(char *s)
 	DCCpp::mainRegs.writeCVBitMain(cab, cv, bNum, bValue);
 
 #ifdef DCCPP_DEBUG_MODE
-	DCCPP_INTERFACE.print("{b addr=");
+	DCCPP_INTERFACE.print(F("{wr bit main addr="));
 	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" CV");
 	DCCPP_INTERFACE.print(cv); DCCPP_INTERFACE.print("[");
 	DCCPP_INTERFACE.print(bNum); DCCPP_INTERFACE.print("] <- ");

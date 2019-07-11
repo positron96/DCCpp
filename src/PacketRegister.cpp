@@ -443,16 +443,16 @@ void RegisterList::writeCVBitMain(int cab, int cv, int bNum, int bValue) volatil
 #ifdef DCCPP_DEBUG_MODE
 void RegisterList::printPacket(int nReg, byte *b, int nBytes, int nRepeat) volatile 
 {  
-	DCCPP_INTERFACE.print("<*");
+	DCCPP_INTERFACE.print(F("{packet nreg="));
 	DCCPP_INTERFACE.print(nReg);
-	DCCPP_INTERFACE.print(":");
+	DCCPP_INTERFACE.print(": [");
   for(int i=0;i<nBytes;i++){
 	  DCCPP_INTERFACE.print(" ");
 	  DCCPP_INTERFACE.print(b[i],HEX);
   }
-  DCCPP_INTERFACE.print(" / ");
+  DCCPP_INTERFACE.print(F("] repeat="));
   DCCPP_INTERFACE.print(nRepeat);
-  DCCPP_INTERFACE.print(">");
+  DCCPP_INTERFACE.print("}");
 #if !defined(USE_ETHERNET)
   DCCPP_INTERFACE.println("");
 #endif

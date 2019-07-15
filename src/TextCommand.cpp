@@ -915,7 +915,7 @@ void TextCommand::readCV(volatile RegisterList& rl, char *s)
 	DCCPP_INTERFACE.print("|");
 	DCCPP_INTERFACE.print(callBackSub);
 	DCCPP_INTERFACE.print("|");
-	DCCPP_INTERFACE.print(cv + 1);
+	DCCPP_INTERFACE.print(cv);
 	DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(bValue);
 	DCCPP_INTERFACE.print(">");
@@ -946,7 +946,7 @@ void TextCommand::writeVerifyCVByteProg(char *s)
 	DCCPP_INTERFACE.print("|");
 	DCCPP_INTERFACE.print(callBackSub);
 	DCCPP_INTERFACE.print("|");
-	DCCPP_INTERFACE.print(cv + 1);
+	DCCPP_INTERFACE.print(cv);
 	DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(ret ? bValue : -1);
 	DCCPP_INTERFACE.print(">");
@@ -976,7 +976,7 @@ void TextCommand::writeVerifyCVBitProg(char *s)
 	DCCPP_INTERFACE.print("|");
 	DCCPP_INTERFACE.print(callBackSub);
 	DCCPP_INTERFACE.print("|");
-	DCCPP_INTERFACE.print(cv + 1);
+	DCCPP_INTERFACE.print(cv);
 	DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(bNum);
 	DCCPP_INTERFACE.print(" ");

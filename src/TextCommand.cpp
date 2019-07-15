@@ -12,6 +12,9 @@ Part of DCC++ BASE STATION for the Arduino
 // See TextCommand::parse() below for defined text commands.
 
 #include "TextCommand.h"
+
+#include "RF24Acc.h"
+
 #ifdef USE_TEXTCOMMAND
 
 #ifdef VISUALSTUDIO
@@ -847,6 +850,8 @@ void TextCommand::setAccessory(char *s)
 		return;
 	}
 
+	bool rfRes = RF24Acc::sendAccessory(aAdd, aNum, activate);
+	if(!rfRes)
 		DCCpp::mainRegs.setAccessory(aAdd, aNum, activate);
 
 #ifdef DCCPP_DEBUG_MODE

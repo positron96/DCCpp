@@ -129,7 +129,7 @@ void DCCpp::beginMain(uint8_t inSignalPin, uint8_t inSignalEnable, uint8_t inCur
 		return;
 	}
 
-	mainMonitor.begin(DCCppConfig::CurrentMonitorMain, DCCppConfig::SignalEnablePinMain, (char *) "<p2>");
+	mainMonitor.begin(DCCppConfig::CurrentMonitorMain);
 
 	if (inSignalPin != UNDEFINED_PIN) {
 		pinMode(inSignalPin, OUTPUT); 
@@ -187,7 +187,7 @@ void DCCpp::beginProg(uint8_t inSignalPin, uint8_t inSignalEnable, uint8_t inCur
 		return;
 	}
 
-	progMonitor.begin(DCCppConfig::CurrentMonitorProg, DCCppConfig::SignalEnablePinProg, (char *) "<p3>");
+	progMonitor.begin(DCCppConfig::CurrentMonitorProg);
 
 	if (inSignalPin != UNDEFINED_PIN) {
 		pinMode(inSignalPin, OUTPUT); 
@@ -230,8 +230,8 @@ void DCCpp::begin()
 	DCCppConfig::SignalPortMaskMain = 0;
 	DCCppConfig::SignalPortMaskProg = 0;
 
-	mainMonitor.begin(UNDEFINED_PIN, UNDEFINED_PIN, "");
-	progMonitor.begin(UNDEFINED_PIN, UNDEFINED_PIN, "");
+	mainMonitor.begin(UNDEFINED_PIN);
+	progMonitor.begin(UNDEFINED_PIN);
 
 #ifdef SDCARD_CS
 	pinMode(SDCARD_CS, OUTPUT);
@@ -496,6 +496,15 @@ void DCCpp::powerOff(bool inMain, bool inProg)
 #if !defined(USE_ETHERNET)
 	DCCPP_INTERFACE.println("");
 #endif
+}
+
+bool DCCpp::isPowerOn() {
+	bool v = false;
+	if (DCCppConfig::SignalEnablePinProg != UNDEFINED_PIN)
+		v |= digitalRead(DCCppConfig::SignalEnablePinProg);
+	if (DCCppConfig::SignalEnablePinMain != UNDEFINED_PIN)
+		v |= digitalRead(DCCppConfig::SignalEnablePinMain);
+	return v;
 }
 
 /***************************** Driving functions */

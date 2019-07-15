@@ -154,6 +154,9 @@ class DCCpp
 		*/
 		static void powerOff(bool inMain = true, bool inProg = true);
 
+		/** Returns whether tracks are powered. */
+		static bool isPowerOn();
+
 		/** Set the maximum current value before an event 'too much current consumption detected !' for main track.
 		@param inMax	Maximum value between 0 and 1023. Default is 300.
 		*/

@@ -17,11 +17,9 @@ Part of DCC++ BASE STATION for the Arduino
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void CurrentMonitor::begin(int pin, int inSignalPin, const char *msg, float inSampleMax)
+void CurrentMonitor::begin(int pin, float inSampleMax)
 {
 	this->pin = pin;
-	this->signalPin = inSignalPin;
-	this->msg = msg;
 	this->current = 0;
 	this->currentSampleMax = inSampleMax;
 } // CurrentMonitor::begin
@@ -40,15 +38,12 @@ void CurrentMonitor::check()
 		return;
 
 	this->current = (float)(analogRead(this->pin) * CURRENT_SAMPLE_SMOOTHING + this->current * (1.0 - CURRENT_SAMPLE_SMOOTHING));      // compute new exponentially-smoothed current
+	//Serial.println(current);
 
 	// current overload and Signal is on
-	if (this->current > this->currentSampleMax && digitalRead(this->signalPin) == HIGH)
+	if (DCCpp::isPowerOn() && this->current > this->currentSampleMax)
 	{
-		digitalWrite(this->signalPin, LOW);
-		DCCPP_INTERFACE.print(this->msg);          // print corresponding error message
-#if !defined(USE_ETHERNET)
-		DCCPP_INTERFACE.println("");
-#endif
+		DCCpp::powerOff();
 	}
 } // CurrentMonitor::check  
 

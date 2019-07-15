@@ -788,16 +788,14 @@ void TextCommand::setThrottle(char *s)
 
 	DCCpp::mainRegs.setThrottle(nReg, cab, tSpeed, tDirection);
 
-#ifdef DCCPP_DEBUG_MODE
-	DCCPP_INTERFACE.print(F("{thr nReg="));
-	DCCPP_INTERFACE.print(nReg); DCCPP_INTERFACE.print(" addr=");
-	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" speed=");
-	DCCPP_INTERFACE.print(tSpeed); DCCPP_INTERFACE.print(" dir=");
+	DCCPP_INTERFACE.print("<T");
+	DCCPP_INTERFACE.print(nReg); DCCPP_INTERFACE.print(" ");
+	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" ");
+	DCCPP_INTERFACE.print(tSpeed); DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(tDirection);
-	DCCPP_INTERFACE.print("}");
+	DCCPP_INTERFACE.print(">");
 #if !defined(USE_ETHERNET)
 	DCCPP_INTERFACE.println("");
-#endif
 #endif
 } // TextCommand::setThrottle(string)
 
@@ -822,16 +820,16 @@ void TextCommand::setFunction(char *s)
 
 	DCCpp::mainRegs.setFunction(0, cab, fByte, eByte);	// TODO : nReg 0 is not valid !
 
-#ifdef DCCPP_DEBUG_MODE
-	DCCPP_INTERFACE.print(F("{fun addr="));
-	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" f=");
-	DCCPP_INTERFACE.print(fByte); DCCPP_INTERFACE.print(" e=");
+	DCCPP_INTERFACE.print("<F");
+	DCCPP_INTERFACE.print(0); DCCPP_INTERFACE.print(" ");
+	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" ");
+	DCCPP_INTERFACE.print(fByte); DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(eByte);
-	DCCPP_INTERFACE.print("}");
+	DCCPP_INTERFACE.print(">");
 #if !defined(USE_ETHERNET)
 	DCCPP_INTERFACE.println("");
 #endif
-#endif
+
 
 } // TextCommand::setFunction(string)
 
@@ -851,7 +849,7 @@ void TextCommand::setAccessory(char *s)
 		return;
 	}
 
-	DCCpp::mainRegs.setAccessory(aAdd, aNum, activate);
+		DCCpp::mainRegs.setAccessory(aAdd, aNum, activate);
 
 #ifdef DCCPP_DEBUG_MODE
 	DCCPP_INTERFACE.print(F("{acc id="));

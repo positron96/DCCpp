@@ -222,11 +222,11 @@ int RegisterList::readCV(int cv, int callBack, int callBackSub) volatile
 
 	cv--;                              // actual CV addresses are cv-1 (0-1023)
 
-	byte MonitorPin = DCCppConfig::CurrentMonitorProg;
+	byte monitorPin = DCCppConfig::CurrentMonitorProg;
 	if (DCCpp::IsMainTrack(this))
-		MonitorPin = DCCppConfig::CurrentMonitorMain;
+		monitorPin = DCCppConfig::CurrentMonitorMain;
 
-	if (MonitorPin == UNDEFINED_PIN)
+	if (monitorPin == UNDEFINED_PIN)
 		return -1;
 
 	bRead[0] = 0x78 + (highByte(cv) & 0x03);   // any CV>1023 will become modulus(1024) due to bit-mask of 0x03
@@ -234,18 +234,24 @@ int RegisterList::readCV(int cv, int callBack, int callBackSub) volatile
 
 	bValue = 0;
 
+	int v;
+
 	for (int i = 0; i<8; i++) {
 
 		c = 0;
 		d = 0;
 		base = 0;
 
+		//Serial.print("bit "+String(i) );
+
+
 		for (int j = 0; j < ACK_BASE_COUNT; j++)
 		{
-			int val = (int)analogRead(MonitorPin);
-			base += val;
+			v = (int)analogRead(monitorPin);
+			base += v;
 		}
 		base /= ACK_BASE_COUNT;
+
 
 		bRead[2] = 0xE8 + i;
 
@@ -255,13 +261,17 @@ int RegisterList::readCV(int cv, int callBack, int callBackSub) volatile
 
 		for (int j = 0; j<ACK_SAMPLE_COUNT; j++)
 		{
-			int val = (int)analogRead(MonitorPin);
-			c = (int)((val - base)*ACK_SAMPLE_SMOOTHING + c*(1.0 - ACK_SAMPLE_SMOOTHING));
-			if (c>ACK_SAMPLE_THRESHOLD)
+			v = (int)analogRead(monitorPin);
+			c = (int)(ACK_MUL*(v - base)*ACK_SAMPLE_SMOOTHING + c*(1.0 - ACK_SAMPLE_SMOOTHING));
+			//if(v!= 0) Serial.print(String(v)+"("+c+") ");
+			if (c>ACK_SAMPLE_THRESHOLD*ACK_MUL) {
 				d = 1;
+				//Serial.print(" ### ");
+			}
 		}
 
 		bitWrite(bValue, i, d);
+		//Serial.println("");
 	}
 
 	c = 0;
@@ -269,7 +279,7 @@ int RegisterList::readCV(int cv, int callBack, int callBackSub) volatile
 	base = 0;
 
 	for (int j = 0; j<ACK_BASE_COUNT; j++)
-		base += analogRead(MonitorPin);
+		base += analogRead(monitorPin);
 	base /= ACK_BASE_COUNT;
 
 	bRead[0] = 0x74 + (highByte(cv) & 0x03);   // set-up to re-verify entire byte
@@ -279,11 +289,18 @@ int RegisterList::readCV(int cv, int callBack, int callBackSub) volatile
 	loadPacket(0, bRead, 3, 5);                // NMRA recommends 5 verify packets
 	loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
 
+	//Serial.print("verify ");
 	for (int j = 0; j<ACK_SAMPLE_COUNT; j++) {
-		c = (int)((analogRead(MonitorPin) - base)*ACK_SAMPLE_SMOOTHING + c*(1.0 - ACK_SAMPLE_SMOOTHING));
-		if (c>ACK_SAMPLE_THRESHOLD)
+		v = analogRead(monitorPin);
+		c = (int)(ACK_MUL*(v - base)*ACK_SAMPLE_SMOOTHING + c*(1.0 - ACK_SAMPLE_SMOOTHING));
+		//if(v!= 0) Serial.print(String(v)+"("+c+") ");
+		if (c>ACK_SAMPLE_THRESHOLD*ACK_MUL) {
 			d = 1;
+			//Serial.print("+ ");
+		}
 	}
+
+	//Serial.println("");
 
 	if (d == 0)    // verify unsuccessful
 		bValue = -1;
@@ -297,7 +314,7 @@ int RegisterList::readCV(int cv, int callBack, int callBackSub) volatile
 bool RegisterList::writeVerifyCVByte(int cv, int bValue, int callBack, int callBackSub) volatile 
 {
 	byte bWrite[4];
-	int c, d, base;
+	int c, d, base, v;
 
 	cv--;                              // actual CV addresses are cv-1 (0-1023)
 
@@ -305,21 +322,33 @@ bool RegisterList::writeVerifyCVByte(int cv, int bValue, int callBack, int callB
 	bWrite[1] = lowByte(cv);
 	bWrite[2] = bValue;
 
+	byte monitorPin = DCCppConfig::CurrentMonitorProg;
+	if (DCCpp::IsMainTrack(this))
+		monitorPin = DCCppConfig::CurrentMonitorMain;
+
+	if (monitorPin != UNDEFINED_PIN)
+	{
+		base = 0;
+		for (int j = 0; j < ACK_BASE_COUNT; j++) {
+			v = analogRead(monitorPin);
+			//Serial.println(v);
+			base += v;
+		}
+		base /= ACK_BASE_COUNT;
+	}
+
 	loadPacket(0, resetPacket, 2, 1);
 	loadPacket(0, bWrite, 3, 4);
 	loadPacket(0, resetPacket, 2, 1);
 	loadPacket(0, idlePacket, 2, 10);
 
 	// If monitor pin undefined, write cv without any confirmation...
-	if (DCCppConfig::CurrentMonitorProg != UNDEFINED_PIN)
+	if (monitorPin != UNDEFINED_PIN)
 	{
 		c = 0;
 		d = 0;
-		base = 0;
 
-		for (int j = 0; j < ACK_BASE_COUNT; j++)
-			base += analogRead(DCCppConfig::CurrentMonitorProg);
-		base /= ACK_BASE_COUNT;
+		//Serial.println("verify; base="+String(base) );
 
 		bWrite[0] = 0x74 + (highByte(cv) & 0x03);   // set-up to re-verify entire byte
 
@@ -328,12 +357,16 @@ bool RegisterList::writeVerifyCVByte(int cv, int bValue, int callBack, int callB
 		loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
 
 		for (int j = 0; j < ACK_SAMPLE_COUNT; j++) {
-			c = (int)((analogRead(DCCppConfig::CurrentMonitorProg) - base)*ACK_SAMPLE_SMOOTHING + c*(1.0 - ACK_SAMPLE_SMOOTHING));
-			if (c > ACK_SAMPLE_THRESHOLD)
+			v = analogRead(monitorPin);
+			c = (int)(ACK_MUL*(v - base)*ACK_SAMPLE_SMOOTHING + c*(1.0 - ACK_SAMPLE_SMOOTHING));
+			//if(v!= 0) Serial.print(String(v)+"("+c+") ");
+			if (c > ACK_SAMPLE_THRESHOLD*ACK_MUL) {
 				d = 1;
+				//Serial.print("+ ");
+			}
 		}
 
-		return d == 1;    // verify unsuccessful
+		return d == 1;    // verify successful
 	}
 
 	return false;
@@ -346,7 +379,7 @@ bool RegisterList::writeVerifyCVByte(int cv, int bValue, int callBack, int callB
 bool RegisterList::writeVerifyCVBit(int cv, int bNum, int bValue, int callBack, int callBackSub) volatile 
 {
 	byte bWrite[4];
-	int c, d, base;
+	int c, d, base, v;
 
 	cv--;                              // actual CV addresses are cv-1 (0-1023)
 	bValue = bValue % 2;
@@ -356,21 +389,31 @@ bool RegisterList::writeVerifyCVBit(int cv, int bNum, int bValue, int callBack, 
 	bWrite[1] = lowByte(cv);
 	bWrite[2] = 0xF0 + bValue * 8 + bNum;
 
+	byte monitorPin = DCCppConfig::CurrentMonitorProg;
+	if (DCCpp::IsMainTrack(this))
+		monitorPin = DCCppConfig::CurrentMonitorMain;
+
+	if (monitorPin != UNDEFINED_PIN)
+	{
+		base = 0;
+
+		for (int j = 0; j < ACK_BASE_COUNT; j++) {
+			v = analogRead(monitorPin);
+			base += v;
+		}
+		base /= ACK_BASE_COUNT;
+	}
+
 	loadPacket(0, resetPacket, 2, 1);
 	loadPacket(0, bWrite, 3, 4);
 	loadPacket(0, resetPacket, 2, 1);
 	loadPacket(0, idlePacket, 2, 10);
 
 	// If monitor pin undefined, write cv without any confirmation...
-	if (DCCppConfig::CurrentMonitorProg != UNDEFINED_PIN)
+	if (monitorPin != UNDEFINED_PIN)
 	{
 		c = 0;
 		d = 0;
-		base = 0;
-
-		for (int j = 0; j < ACK_BASE_COUNT; j++)
-			base += analogRead(DCCppConfig::CurrentMonitorProg);
-		base /= ACK_BASE_COUNT;
 
 		bitClear(bWrite[2], 4);              // change instruction code from Write Bit to Verify Bit
 
@@ -379,13 +422,16 @@ bool RegisterList::writeVerifyCVBit(int cv, int bNum, int bValue, int callBack, 
 		loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
 
 		for (int j = 0; j < ACK_SAMPLE_COUNT; j++) {
-			c = (int)((analogRead(DCCppConfig::CurrentMonitorProg) - base)*ACK_SAMPLE_SMOOTHING + c*(1.0 - ACK_SAMPLE_SMOOTHING));
-			if (c > ACK_SAMPLE_THRESHOLD)
+			v = analogRead(monitorPin);
+			c = (int)((ACK_MUL*(v - base)*ACK_SAMPLE_SMOOTHING + c*(1.0 - ACK_SAMPLE_SMOOTHING)));
+			if (c > ACK_SAMPLE_THRESHOLD*ACK_MUL)
 				d = 1;
 		}
 
 		return d == 1;    // verify unsuccessful
 	}
+
+	return false;
 
 } // RegisterList::writeCVBit(ints)
 

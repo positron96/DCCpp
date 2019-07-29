@@ -210,7 +210,7 @@ void TextCommand::parse(char *com){
 * USED TO CREATE/EDIT/REMOVE/SHOW TURNOUT DEFINITIONS
 */
 
-		Turnout::parse(com+1);
+		processTurnout(com+1);
 		break;
 #endif
 
@@ -858,6 +858,123 @@ void TextCommand::setAccessory(char *s)
 #endif
 
 } // TextCommand::setAccessory(string)
+
+
+void TextCommand::processTurnout(char *c) {
+	int n,s,m;
+	Turnout *t;
+	int nArgs = sscanf(c,"%d %d %d",&n,&s,&m);
+	Serial.print("Args=");Serial.print(nArgs);Serial.print("; ");
+	Serial.println(String("n=")+n+"; s="+s+"; m="+m);
+	switch(nArgs) {
+		// argument is string with id number of turnout followed by zero (not thrown) or one (thrown)
+		case 2: 
+			{
+				Turnout *t = Turnout::get(n);
+				if(t!=NULL) {
+					t->activate(s);
+				
+					DCCPP_INTERFACE.print("<H");
+					DCCPP_INTERFACE.print(t->data.id);
+					if (t->data.tStatus == 0)
+						DCCPP_INTERFACE.print(" 0>");
+					else
+						DCCPP_INTERFACE.print(" 1>");
+					#if !defined(USE_ETHERNET)
+						DCCPP_INTERFACE.println("");
+					#endif
+				} else {
+					DCCPP_INTERFACE.print("<X>");
+					#if !defined(USE_ETHERNET)
+						DCCPP_INTERFACE.println("");
+					#endif
+				}
+			}
+			break;		
+
+		// argument is string with id number of turnout followed by an address and subAddress
+		case 3: 
+			{
+				#ifdef DCCPP_DEBUG_MODE
+				Serial.print(F("{turnout add id="));
+				Serial.print(n);Serial.print("; s=");
+				Serial.print(s);Serial.print("; m=");
+				Serial.print(m);
+				Serial.println("}");
+				#endif
+
+				Turnout *tt = Turnout::create(n,s,m);
+				if (tt == NULL) {       // problem allocating memory or id already present
+					DCCPP_INTERFACE.print("<X>");
+					#if !defined(USE_ETHERNET)
+						DCCPP_INTERFACE.println("");
+					#endif
+				} else {
+					DCCPP_INTERFACE.print("<O>");
+					#if !defined(USE_ETHERNET)
+						DCCPP_INTERFACE.println("");
+					#endif
+				}
+			}
+			break;
+
+		// argument is a string with id number only
+		case 1: 
+			{
+				#ifdef DCCPP_DEBUG_MODE
+				Serial.print(F("{turnout del id="));
+				Serial.print(n);
+				Serial.println("}");
+				#endif
+
+				bool ret = Turnout::remove(n);
+				if (ret) {
+					DCCPP_INTERFACE.print("<O>");
+					#if !defined(USE_ETHERNET)
+						DCCPP_INTERFACE.println("");
+					#endif
+				} else {
+					DCCPP_INTERFACE.print("<X>");
+					#if !defined(USE_ETHERNET)
+						DCCPP_INTERFACE.println("");
+					#endif
+				}
+			}
+			break;
+
+		case 0:          // no arguments
+		case -1:
+			{
+				Turnout *tt;
+
+				if (Turnout::firstTurnout == NULL) {
+					DCCPP_INTERFACE.print("<X>");
+					#if !defined(USE_ETHERNET)
+						DCCPP_INTERFACE.println("");
+					#endif
+				} else {
+
+					for (tt = Turnout::firstTurnout; tt != NULL; tt = tt->nextTurnout) {
+						DCCPP_INTERFACE.print("<H");
+						DCCPP_INTERFACE.print(tt->data.id);
+						DCCPP_INTERFACE.print(" ");
+						DCCPP_INTERFACE.print(tt->data.address);
+						DCCPP_INTERFACE.print(" ");
+						DCCPP_INTERFACE.print(tt->data.subAddress);
+						if (tt->data.tStatus == 0)
+							DCCPP_INTERFACE.print(" 0>");
+						else
+							DCCPP_INTERFACE.print(" 1>");
+						#if !defined(USE_ETHERNET)
+							DCCPP_INTERFACE.println("");
+						#endif
+					}
+				}
+			}
+			break;
+	}
+
+} // TextCommand::processTurnout(char *c) {
 
 
 void TextCommand::writeTextPacket(volatile RegisterList& rl, char *s)

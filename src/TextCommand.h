@@ -37,6 +37,7 @@ private:
 	static void setThrottle(char *);
 	static void setFunction(char *);
 	static void setAccessory(char *);
+	static void processTurnout(char *);
 	static void writeTextPacket(volatile RegisterList& rl, char *);
 
 	static void readCV(volatile RegisterList& rl, char *);

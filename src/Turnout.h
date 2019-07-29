@@ -123,8 +123,9 @@ struct Turnout{
 	@param add	The primary address of the decoder controlling this turnout (0-511).
 	@param subAdd	The sub-address of the decoder controlling this turnout (0-3).
 	@remark Should not be used in command line mode.
+	@return true if setting succeeded, false if this id already exists.
 	*/
-	void begin(int id, int add, int subAdd);
+	bool begin(int id, int add, int subAdd);
 	/** Force the turnout values created by command line.
 	@param id The numeric ID (0-32767) of the sensor.
 	@param add	The primary address of the decoder controlling this turnout (0-511).
@@ -155,21 +156,15 @@ struct Turnout{
 	static Turnout* get(int id);
 	/** Removes a particular turnout.
 	@param id	The numeric ID (0-32767) of the turnout.
+	@return true if removal succeeded (this id was present)
 	@remark Only available when USE_EEPROM or USE_TEXTCOMMAND is defined.
 	*/
-	static void remove(int id);
+	static bool remove(int id);
 	/** Get the total number of turnouts.
 	@return Number of turnouts.
 	@remark Only available when USE_EEPROM or USE_TEXTCOMMAND is defined.
 	*/
 	static int count();
-
-#ifdef DCCPP_PRINT_DCCPP
-	/** Show the content of all the turnouts.
-	@remark Only available when DCCPP_PRINT_DCCPP is defined.
-	*/
-	static void show();
-#endif
 
 #if defined(USE_EEPROM)
 	int eepromPos;	/**< EEPROM starting address for this Turnout storage.*/
@@ -186,21 +181,13 @@ struct Turnout{
 
 #endif
 
-#if defined(USE_TEXTCOMMAND)
-	/** Do command according to the given command string.
-	@param c string to interpret... See syntax in class description.
-	@remark Only available when USE_TEXTCOMMAND is defined.
-	*/
-	static void parse(char *c);
 	/** Creates a new turnout in the list..
 	@param id The numeric ID (0-32767) of the sensor.
 	@param add	The primary address of the decoder controlling this turnout (0-511).
 	@param subAdd	The sub-address of the decoder controlling this turnout (0-3).
-	@remark Should not be used in C++ mode.
-	@remark Only available when USE_TEXTCOMMAND is defined.
 	*/
 	static Turnout *create(int id, int add, int subAdd);
-#endif
+
 
 }; // Turnout
   

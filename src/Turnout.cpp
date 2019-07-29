@@ -21,9 +21,7 @@ Part of DCC++ BASE STATION for the Arduino
 #include "DCCpp_Uno.h"
 //#include "Comm.h"
 
-#ifdef USE_TEXTCOMMAND
-#include "TextCommand.h"
-#endif
+
 
 #ifdef USE_EEPROM
 #include "EEStore.h"
@@ -32,7 +30,7 @@ Part of DCC++ BASE STATION for the Arduino
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Turnout::begin(int id, int add, int subAdd) {
+bool Turnout::begin(int id, int add, int subAdd) {
 #if defined(USE_EEPROM)	|| defined(USE_TEXTCOMMAND)
 #if defined(USE_EEPROM)	&& defined(DCCPP_DEBUG_MODE)
 	if (strncmp(EEStore::data.id, EESTORE_ID, sizeof(EESTORE_ID)) != 0) {    // check to see that eeStore contains valid DCC++ ID
@@ -47,16 +45,15 @@ void Turnout::begin(int id, int add, int subAdd) {
 		while (tt->nextTurnout != NULL)
 			tt = tt->nextTurnout;
 		tt->nextTurnout = this;
+	} else {
+		// this ID already present
+		return false;
 	}
 #endif
 
 	this->set(id, add, subAdd);
+	return true;
 
-#ifdef USE_TEXTCOMMAND
-	DCCPP_INTERFACE.print("<O>");
-#if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
-#endif
 #endif
 }
 
@@ -82,17 +79,7 @@ void Turnout::activate(int s) {
 		EEPROM.put(this->eepromPos, this->data.tStatus);
 #endif
 #endif
-#ifdef USE_TEXTCOMMAND
-	DCCPP_INTERFACE.print("<H");
-	DCCPP_INTERFACE.print(data.id);
-	if (data.tStatus == 0)
-		DCCPP_INTERFACE.print(" 0>");
-	else
-		DCCPP_INTERFACE.print(" 1>");
-#if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
-#endif
-#endif
+
 }
 
 #if defined(USE_EEPROM)	|| defined(USE_TEXTCOMMAND)
@@ -106,20 +93,14 @@ Turnout* Turnout::get(int id) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void Turnout::remove(int id) {
+bool Turnout::remove(int id) {
 	Turnout *tt, *pp;
 
 	for (tt = firstTurnout, pp = NULL; tt != NULL && tt->data.id != id; pp = tt, tt = tt->nextTurnout)
 		;
 
 	if (tt == NULL) {
-#ifdef USE_TEXTCOMMAND
-		DCCPP_INTERFACE.print("<X>");
-#if !defined(USE_ETHERNET)
-		DCCPP_INTERFACE.println("");
-#endif
-#endif
-		return;
+		return false;
 	}
 
 	if (tt == firstTurnout)
@@ -129,12 +110,7 @@ void Turnout::remove(int id) {
 
 	free(tt);
 
-#ifdef USE_TEXTCOMMAND
-	DCCPP_INTERFACE.print("<O>");
-#if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
-#endif
-#endif
+	return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -154,6 +130,10 @@ void Turnout::load() {
 	struct TurnoutData data;
 	Turnout *tt;
 
+	// #ifdef DCCPP_DEBUG_MODE
+	// Serial.println("Loading "+String(EEStore::data.nTurnouts)+" turnouts; addr="+EEStore::pointer() );	
+	// #endif
+
 	for (int i = 0; i<EEStore::data.nTurnouts; i++) {
 #ifdef VISUALSTUDIO
 		EEPROM.get(EEStore::pointer(), (void *)&data, sizeof(TurnoutData));
@@ -166,11 +146,14 @@ void Turnout::load() {
 		tt = get(data.id);
 #ifdef DCCPP_DEBUG_MODE
 		if (tt == NULL)
-			DCCPP_INTERFACE.println(F("Turnout::begin() must be called BEFORE Turnout::load() !"));
+			Serial.println(F("Turnout::begin() must be called BEFORE Turnout::load() !"));
 		else
 #endif
 			tt->set(data.id, data.address, data.subAddress);
 #endif
+		// #ifdef DCCPP_DEBUG_MODE
+		// Serial.println("Loaded id="+String(data.id)+"; "+EEStore::pointer() );	
+		// #endif
 		tt->data.tStatus = data.tStatus;
 		tt->eepromPos = EEStore::pointer();
 		EEStore::advance(sizeof(tt->data));
@@ -192,6 +175,9 @@ void Turnout::store() {
 #else
 		EEPROM.put(EEStore::pointer(), tt->data);
 #endif
+		// #ifdef DCCPP_DEBUG_MODE
+		// Serial.println("Storing id="+String(tt->data.id)+"; addr="+EEStore::pointer() );
+		// #endif
 		EEStore::advance(sizeof(tt->data));
 		tt = tt->nextTurnout;
 		EEStore::data.nTurnouts++;
@@ -199,106 +185,30 @@ void Turnout::store() {
 }
 #endif
 
-#endif
-
-#if defined(USE_TEXTCOMMAND)
-///////////////////////////////////////////////////////////////////////////////
-
-void Turnout::parse(char *c){
-  int n,s,m;
-  Turnout *t;
-  
-  switch(sscanf(c,"%d %d %d",&n,&s,&m)){
-    
-    case 2:                     // argument is string with id number of turnout followed by zero (not thrown) or one (thrown)
-      t=get(n);
-      if(t!=NULL)
-        t->activate(s);
-#ifdef USE_TEXTCOMMAND
-	  else
-	  {
-		  DCCPP_INTERFACE.print("<X>");
-#if !defined(USE_ETHERNET)
-		  DCCPP_INTERFACE.println("");
-#endif
-	  }
-#endif
-      break;
-
-    case 3:                     // argument is string with id number of turnout followed by an address and subAddress
-      create(n,s,m);
-    break;
-
-    case 1:                     // argument is a string with id number only
-      remove(n);
-    break;
-    
-#ifdef DCCPP_PRINT_DCCPP
-	case -1:                    // no arguments
-      show();
-    break;
-#endif
-  }
-}
 
 Turnout *Turnout::create(int id, int add, int subAdd) {
 	Turnout *tt = new Turnout();
 
 	if (tt == NULL) {       // problem allocating memory
-#ifdef USE_TEXTCOMMAND
-		DCCPP_INTERFACE.print("<X>");
-#if !defined(USE_ETHERNET)
-		DCCPP_INTERFACE.println("");
-#endif
-#endif
 		return(tt);
 	}
 
-	tt->begin(id, add, subAdd);
+	if( !tt->begin(id, add, subAdd) ) {
+		delete tt;
+		return(NULL);
+	}
 
 	return(tt);
 }
 
-#endif //USE_TEXTCOMMAND
 
 #if defined(USE_EEPROM)	|| defined(USE_TEXTCOMMAND)
-#ifdef DCCPP_PRINT_DCCPP
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Turnout::show() {
-	Turnout *tt;
-
-	if (firstTurnout == NULL) {
-		DCCPP_INTERFACE.print("<X>");
-#if !defined(USE_ETHERNET)
-		DCCPP_INTERFACE.println("");
-#endif
-		return;
-	}
-
-	for (tt = firstTurnout; tt != NULL; tt = tt->nextTurnout) {
-		DCCPP_INTERFACE.print("<H");
-		DCCPP_INTERFACE.print(tt->data.id);
-		DCCPP_INTERFACE.print(" ");
-		DCCPP_INTERFACE.print(tt->data.address);
-		DCCPP_INTERFACE.print(" ");
-		DCCPP_INTERFACE.print(tt->data.subAddress);
-		if (tt->data.tStatus == 0)
-			DCCPP_INTERFACE.print(" 0>");
-		else
-			DCCPP_INTERFACE.print(" 1>");
-#if !defined(USE_ETHERNET)
-		DCCPP_INTERFACE.println("");
-#endif
-	}
-}
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
 
 Turnout *Turnout::firstTurnout = NULL;
-#endif
+#endif //defined(USE_EEPROM)	|| defined(USE_TEXTCOMMAND)
 
 #endif //USE_TURNOUT
 #endif

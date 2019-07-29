@@ -15,6 +15,8 @@ Part of DCC++ BASE STATION for the Arduino
 //#include "PacketRegister.h"
 //#include "Comm.h"
 
+#include "RF24Acc.h"
+
 #ifdef USE_ETHERNET
 uint8_t DCCppConfig::EthernetIp[4];
 uint8_t DCCppConfig::EthernetMac[6];
@@ -184,6 +186,12 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte) volatile
 
 void RegisterList::setAccessory(int aAdd, int aNum, int activate) volatile 
 {
+
+
+	bool rfRes = RF24Acc::sendAccessory(aAdd, aNum, activate);
+	if(rfRes)
+		return;
+
 	byte b[3];                      // save space for checksum byte
 
 	b[0] = aAdd % 64 + 128;         // first byte is of the form 10AAAAAA, where AAAAAA represent 6 least significant bits of accessory address  

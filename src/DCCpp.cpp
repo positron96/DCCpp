@@ -91,9 +91,6 @@ static bool first = true;
 
 void DCCpp::loop()
 {
-#ifdef USE_TEXTCOMMAND
-	TextCommand::process();              // check for, and process, and new serial commands
-#endif
 
 	if (first)
 	{

@@ -37,11 +37,12 @@ void CurrentMonitor::check()
 	if (this->pin == UNDEFINED_PIN)
 		return;
 
-	this->current = (float)(analogRead(this->pin) * CURRENT_SAMPLE_SMOOTHING + this->current * (1.0 - CURRENT_SAMPLE_SMOOTHING));      // compute new exponentially-smoothed current
+	float v = analogRead(this->pin) * 1024 / this->currentSampleMax;
+	this->current = (float)(v * CURRENT_SAMPLE_SMOOTHING + this->current * (1.0 - CURRENT_SAMPLE_SMOOTHING));      // compute new exponentially-smoothed current
 	//Serial.println(current);
 
 	// current overload and Signal is on
-	if (DCCpp::isPowerOn() && this->current > this->currentSampleMax)
+	if (DCCpp::isPowerOn() && this->current > 1024)
 	{
 		DCCpp::powerOff();
 	}

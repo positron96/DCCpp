@@ -481,16 +481,16 @@ void TextCommand::parse(char *com){
 		DCCPP_INTERFACE.println("");
 #endif
 	  	}
-		DCCPP_INTERFACE.print("<iDCCpp LIBRARY BASE STATION FOR ARDUINO ");
+		DCCPP_INTERFACE.print(F("<iDCC++ LIBRARY BASE STATION FOR ARDUINO "));
 		//DCCPP_INTERFACE.print(ARDUINO_TYPE);
 		//DCCPP_INTERFACE.print(" / ");
 		//DCCPP_INTERFACE.print(MOTOR_SHIELD_NAME);
-		DCCPP_INTERFACE.print(": V-");
-		DCCPP_INTERFACE.print(VERSION);
+		DCCPP_INTERFACE.print(F(": V-"));
+		DCCPP_INTERFACE.print(F(VERSION));
 		DCCPP_INTERFACE.print(" / ");
-		DCCPP_INTERFACE.print(__DATE__);
+		DCCPP_INTERFACE.print(F(__DATE__));
 		DCCPP_INTERFACE.print(" ");
-		DCCPP_INTERFACE.print(__TIME__);
+		DCCPP_INTERFACE.print(F(__TIME__));
 		DCCPP_INTERFACE.print(">");
 #if !defined(USE_ETHERNET)
 		DCCPP_INTERFACE.println("");
@@ -820,14 +820,12 @@ void TextCommand::setFunction(char *s)
 
 	DCCpp::mainRegs.setFunction(0, cab, fByte, eByte);	// TODO : nReg 0 is not valid !
 
-	DCCPP_INTERFACE.print("<F");
-	DCCPP_INTERFACE.print(0); DCCPP_INTERFACE.print(" ");
-	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" ");
-	DCCPP_INTERFACE.print(fByte); DCCPP_INTERFACE.print(" ");
-	DCCPP_INTERFACE.print(eByte);
-	DCCPP_INTERFACE.print(">");
-#if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
+#ifdef DCCPP_DEBUG_MODE
+	Serial.print(F("{func addr="));
+	Serial.print(cab); Serial.print(F("; fbyte="));
+	Serial.print(fByte); Serial.print(F("; ebyte="));
+	Serial.print(eByte);
+	Serial.println("}");
 #endif
 
 
@@ -852,14 +850,11 @@ void TextCommand::setAccessory(char *s)
 		DCCpp::mainRegs.setAccessory(aAdd, aNum, activate);
 
 #ifdef DCCPP_DEBUG_MODE
-	DCCPP_INTERFACE.print(F("{acc id="));
-	DCCPP_INTERFACE.print(aAdd); DCCPP_INTERFACE.print(" num=");
-	DCCPP_INTERFACE.print(aNum); DCCPP_INTERFACE.print(" <- ");
-	DCCPP_INTERFACE.print(activate);
-	DCCPP_INTERFACE.print("}");
-#if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
-#endif
+	Serial.print(F("{acc id="));
+	Serial.print(aAdd); Serial.print(F(" num="));
+	Serial.print(aNum); Serial.print(F(" <- "));
+	Serial.print(activate);
+	Serial.println("}");
 #endif
 
 } // TextCommand::setAccessory(string)
@@ -876,18 +871,15 @@ void TextCommand::writeTextPacket(volatile RegisterList& rl, char *s)
 	rl.writeTextPacket(nReg, b, nBytes);
 
 #ifdef DCCPP_DEBUG_MODE
-	DCCPP_INTERFACE.print(F("{raw nreg="));
-	DCCPP_INTERFACE.print(nReg); DCCPP_INTERFACE.print(" ln=");
-	DCCPP_INTERFACE.print(nBytes); DCCPP_INTERFACE.print(": [");
-	DCCPP_INTERFACE.print(b[0]); DCCPP_INTERFACE.print(",");
-	DCCPP_INTERFACE.print(b[1]); DCCPP_INTERFACE.print(",");
-	DCCPP_INTERFACE.print(b[2]); DCCPP_INTERFACE.print(",");
-	DCCPP_INTERFACE.print(b[3]); DCCPP_INTERFACE.print(",");
-	DCCPP_INTERFACE.print(b[4]); DCCPP_INTERFACE.print("] ");
-	DCCPP_INTERFACE.print("}");
-#if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
-#endif
+	Serial.print(F("{raw nreg="));
+	Serial.print(nReg); Serial.print(" ln=");
+	Serial.print(nBytes); Serial.print(": [");
+	Serial.print(b[0]); Serial.print(",");
+	Serial.print(b[1]); Serial.print(",");
+	Serial.print(b[2]); Serial.print(",");
+	Serial.print(b[3]); Serial.print(",");
+	Serial.print(b[4]); Serial.print("] ");
+	Serial.println("}");
 #endif
 
 } // TextCommand::writeTextPacket(string)
@@ -1005,14 +997,11 @@ void TextCommand::writeCVByteMain(char *s)
 	DCCpp::mainRegs.writeCVByteMain(cab, cv, bValue);
 
 #ifdef DCCPP_DEBUG_MODE
-	DCCPP_INTERFACE.print(F("{wr byte main addr="));
-	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" CV");
-	DCCPP_INTERFACE.print(cv); DCCPP_INTERFACE.print(" <- ");
-	DCCPP_INTERFACE.print(bValue); DCCPP_INTERFACE.print(" ");
-	DCCPP_INTERFACE.print("}");
-#if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
-#endif
+	Serial.print(F("{wr byte main addr="));
+	Serial.print(cab); Serial.print(" CV");
+	Serial.print(cv); Serial.print(" <- ");
+	Serial.print(bValue); Serial.print(" ");
+	Serial.println("}");
 #endif
 } // TextCommand::writeCVByteMain(string)
 
@@ -1035,15 +1024,12 @@ void TextCommand::writeCVBitMain(char *s)
 	DCCpp::mainRegs.writeCVBitMain(cab, cv, bNum, bValue);
 
 #ifdef DCCPP_DEBUG_MODE
-	DCCPP_INTERFACE.print(F("{wr bit main addr="));
-	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" CV");
-	DCCPP_INTERFACE.print(cv); DCCPP_INTERFACE.print("[");
-	DCCPP_INTERFACE.print(bNum); DCCPP_INTERFACE.print("] <- ");
-	DCCPP_INTERFACE.print(bValue); DCCPP_INTERFACE.print(" ");
-	DCCPP_INTERFACE.print("}");
-#if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
-#endif
+	Serial.print(F("{wr bit main addr="));
+	Serial.print(cab); Serial.print(" CV");
+	Serial.print(cv); Serial.print("[");
+	Serial.print(bNum); Serial.print("] <- ");
+	Serial.print(bValue); Serial.print(" ");
+	Serial.println("}");
 #endif
 
 } // TextCommand::writeCVBitMain(string)
